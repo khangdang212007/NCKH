@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChemSafe AI — Hệ thống tra cứu hóa chất thông minh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="mol3d.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════
+     SIDEBAR NAVIGATION
+════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⬡</div>
+      <span class="logo-text">ChemSafe<span class="logo-ai">AI</span></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="chat" onclick="switchTab('chat', this)">
+        <span class="nav-icon">◈</span>
+        <span>Chatbot AI</span>
+      </button>
+      <button class="nav-item" data-tab="warning" onclick="switchTab('warning', this)">
+        <span class="nav-icon">⚠</span>
+        <span>Cảnh báo chất</span>
+      </button>
+      <button class="nav-item" data-tab="qr" onclick="switchTab('qr', this)">
+        <span class="nav-icon">▦</span>
+        <span>Tạo nhãn dán</span>
+      </button>
+      <button class="nav-item" data-tab="calc" onclick="switchTab('calc', this)">
+        <span class="nav-icon">∑</span>
+        <span>Tính toán</span>
+      </button>
+      <button class="nav-item" data-tab="database" onclick="switchTab('database', this)">
+        <span class="nav-icon">◉</span>
+        <span>Cơ sở dữ liệu</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-status">
+      <div class="status-indicator">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="api-status-text">Chưa cấu hình API</span>
+      </div>
+      <div class="api-note" id="api-note">ChemSafe AI</div>
+      <button class="api-config-btn" onclick="openApiModal()"
+        style="margin-top: 8px; width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #444; background: #222; color: #fff; cursor: pointer; font-size: 12px;">
+        ⚙ Cài đặt API Key
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- ── TAB: CHATBOT AI ── -->
+    <section class="tab-panel active" id="tab-chat">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Chatbot AI <span class="title-accent">Tra cứu hóa chất</span></h1>
+          <p class="panel-sub">Hỏi bất cứ điều gì về hóa chất — tôi sẽ trả lời ngay</p>
+        </div>
+        <button class="clear-btn" onclick="clearChat()">✕ Xóa cuộc trò chuyện</button>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg bot">
+            <div class="msg-avatar">AI</div>
+            <div class="msg-content">
+              <div class="msg-bubble">
+                Xin chào! Tôi là <strong>ChemSafe AI</strong> — trợ lý tra cứu hóa chất dùng dữ liệu local và
+                PubChem.<br><br>
+                Tôi có thể giúp bạn:
+                <ul class="feature-list">
+                  <li>🔬 Tra cứu tính chất, công thức, độc tính hóa chất</li>
+                  <li>⚠️ Cảnh báo nguy hiểm khi trộn hóa chất</li>
+                  <li>🚨 Hướng dẫn sơ cứu & xử lý sự cố</li>
+                  <li>📋 Tra cứu tài liệu MSDS/SDS theo GHS</li>
+                  <li>🏭 Quy trình an toàn phòng thí nghiệm</li>
+                </ul>
+              </div>
+              <div class="msg-time">Hệ thống</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-questions">
+          <div class="quick-label">Câu hỏi nhanh:</div>
+          <div class="chips-row">
+            <button class="chip" onclick="sendQuick('HCl là gì? Cho tôi biết tính chất và mức độ nguy hiểm')">HCl là
+              gì?</button>
+            <button class="chip" onclick="sendQuick('Trộn NaOH và HCl có nguy hiểm không? Giải thích phản ứng')">NaOH +
+              HCl?</button>
+            <button class="chip" onclick="sendQuick('Axit đổ ra da phải làm gì? Hướng dẫn sơ cứu khẩn cấp')">Sơ cứu
+              axit</button>
+            <button class="chip" onclick="sendQuick('H2SO4 đặc bảo quản và lưu trữ thế nào cho an toàn?')">Lưu trữ
+              H₂SO₄</button>
+            <button class="chip" onclick="sendQuick('Các hóa chất tuyệt đối không được trộn với nhau là gì?')">Hóa chất
+              cấm trộn</button>
+            <button class="chip" onclick="sendQuick('MSDS là gì và cách đọc tài liệu an toàn hóa chất?')">MSDS là
+              gì?</button>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <textarea id="chat-input" class="chat-textarea"
+            placeholder="Nhập câu hỏi về hóa chất... (Enter để gửi, Shift+Enter xuống dòng)" rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <span id="send-icon">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB: CẢNH BÁO ── -->
+    <section class="tab-panel" id="tab-warning">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Cảnh báo <span class="title-accent">Trộn hóa chất</span></h1>
+          <p class="panel-sub">Kiểm tra mức độ nguy hiểm trước khi kết hợp hóa chất</p>
+        </div>
+      </div>
+
+      <div class="warning-layout">
+        <!-- Checker -->
+        <div class="checker-card">
+          <div class="checker-title">⬡ Kiểm tra tổ hợp hóa chất</div>
+          <div class="checker-row">
+            <div class="select-group">
+              <label class="select-label">Hóa chất thứ nhất</label>
+              <select class="chem-select" id="chem1" onchange="autoCheck()">
+                <option value="">— Chọn hóa chất —</option>
+              </select>
+            </div>
+            <div class="plus-icon">+</div>
+            <div class="select-group">
+              <label class="select-label">Hóa chất thứ hai</label>
+              <select class="chem-select" id="chem2" onchange="autoCheck()">
+                <option value="">— Chọn hóa chất —</option>
+              </select>
+            </div>
+          </div>
+          <div id="mix-result" class="mix-result"></div>
+          <button class="ai-analyze-btn" onclick="analyzeWithAI()">
+            ◈ Phân tích chi tiết bằng chatbot →
+          </button>
+        </div>
+
+        <!-- Common warnings -->
+        <div class="warn-list">
+          <div class="warn-list-title">⚠ Cảnh báo phổ biến</div>
+          <div id="common-warnings"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB: QR CODE ── -->
+    <section class="tab-panel" id="tab-qr">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title"><span class="title-accent">Nhãn hóa chất</span></h1>
+          <p class="panel-sub">Tạo mã nhãn dán an toàn cho từng hóa chất trong phòng lab</p>
+        </div>
+      </div>
+
+      <div class="qr-layout">
+        <div class="qr-controls">
+          <div class="qr-form-title">Thông tin hóa chất</div>
+          <div class="form-group">
+            <label class="form-label">Tên hóa chất</label>
+            <input class="form-input" type="text" id="qr-name" placeholder="VD: Axit clohydric"
+              oninput="updateQRPreview()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Công thức hóa học</label>
+            <input class="form-input" type="text" id="qr-formula" placeholder="VD: HCl" oninput="updateQRPreview()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mức độ nguy hiểm</label>
+            <select class="form-select" id="qr-danger" onchange="updateQRPreview()">
+              <option value="safe">🟢 An toàn</option>
+              <option value="caution">🟡 Thận trọng</option>
+              <option value="danger" selected>🔴 Nguy hiểm</option>
+              <option value="extreme">⚫ Cực kỳ nguy hiểm</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vị trí lưu trữ</label>
+            <input class="form-input" type="text" id="qr-location" placeholder="VD: Tủ A3, Kệ 2"
+              oninput="updateQRPreview()" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Thông tin liên hệ khẩn cấp</label>
+            <input class="form-input" type="text" id="qr-contact" placeholder="VD: 0901-234-567"
+              oninput="updateQRPreview()" />
+          </div>
+          <button class="generate-btn" onclick="generateQR()">▦ Tạo QR Code</button>
+          <button class="download-btn" onclick="downloadQR()" id="download-btn" disabled>↓ Tải về PNG</button>
+        </div>
+
+        <div class="qr-preview-area">
+          <div class="qr-preview-card" id="qr-preview-card">
+            <div class="qr-preview-header" id="qr-preview-header">
+              <div class="qr-preview-formula" id="qr-preview-formula">HCl</div>
+              <div class="qr-preview-name" id="qr-preview-name">Axit Clohydric</div>
+              <div class="qr-badge danger" id="qr-preview-badge">⚠ NGUY HIỂM</div>
+            </div>
+            <div class="qr-code-box" id="qr-code-box">
+              <canvas id="qr-canvas" width="200" height="200"></canvas>
+            </div>
+            <div class="qr-preview-info">
+              <div class="qr-info-row">
+                <span>📍 Vị trí:</span><strong id="qr-prev-location">Tủ A3, Kệ 2</strong>
+              </div>
+              <div class="qr-info-row">
+                <span>📞 Khẩn cấp:</span><strong id="qr-prev-contact">0901-234-567</strong>
+              </div>
+              <div class="qr-info-row">
+                <span>📅 Ngày tạo:</span><strong id="qr-prev-date"></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB: TÍNH TOÁN ── -->
+    <section class="tab-panel" id="tab-calc">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Tính toán <span class="title-accent">Hóa học</span></h1>
+          <p class="panel-sub">Tính mol, khối lượng, nồng độ mol và pha loãng từ dữ liệu hóa chất</p>
+        </div>
+      </div>
+
+      <div class="calc-layout">
+        <div class="calc-card calc-chem-card">
+          <div class="calc-title">Chọn hóa chất (gõ tên hoặc công thức để tìm)</div>
+          <div class="chemical-search-wrap">
+            <input class="form-input" id="calc-chemical-search" type="text" autocomplete="off"
+              placeholder="🔍 VD: HCl, axit, NaOH..." onfocus="showCalcChemicalResults()"
+              oninput="searchCalcChemical(this.value)" />
+            <div class="chemical-results" id="calc-chemical-results"></div>
+            <input type="hidden" id="calc-chem" value="0" />
+          </div>
+          <div class="calc-chem-meta">
+            <div class="calc-formula" id="calc-formula">--</div>
+            <div class="calc-name" id="calc-name">Chọn một chất để bắt đầu</div>
+            <div class="calc-meta-grid">
+              <div>
+                <span>Khối lượng mol</span>
+                <strong id="calc-molar-mass">--</strong>
+              </div>
+              <div>
+                <span>Mức độ</span>
+                <strong id="calc-danger">--</strong>
+              </div>
+              <div>
+                <span>pH tham khảo</span>
+                <strong id="calc-ph">--</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="calc-grid">
+          <div class="calc-card">
+            <div class="calc-title">Mol, khối lượng, nồng độ</div>
+            <div class="calc-input-grid"><label class="calc-field"><span>Khối lượng mẫu</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-mass-g" type="number" min="0" step="any"
+                    placeholder="VD: 5" oninput="updateCalc()" /><select class="form-select calc-unit"
+                    id="calc-mass-unit" onchange="updateCalc()">
+                    <option value="mg">mg</option>
+                    <option value="g" selected>g</option>
+                    <option value="kg">kg</option>
+                  </select></div>
+              </label><label class="calc-field"><span>Số mol (mol)</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-moles" type="number" min="0" step="any"
+                    placeholder="VD: 0.1" oninput="updateCalc()" /></div>
+              </label><label class="calc-field"><span>Thể tích dung dịch</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-volume-l" type="number" min="0"
+                    step="any" placeholder="VD: 0.25" oninput="updateCalc()" /><select class="form-select calc-unit"
+                    id="calc-volume-unit" onchange="updateCalc()">
+                    <option value="mL">mL</option>
+                    <option value="L" selected>L</option>
+                  </select></div>
+              </label></div>
+            <div class="calc-results">
+              <div><span>Mol từ khối lượng</span><strong id="calc-result-moles">--</strong></div>
+              <div><span>Khối lượng từ mol</span><strong id="calc-result-mass">--</strong></div>
+              <div><span>Nồng độ mol</span><strong id="calc-result-molarity">--</strong></div>
+            </div>
+            <div class="calc-actions">
+              <button class="calc-btn" type="button" onclick="showMoleSolution()">📘 Xem lời giải từng bước</button>
+              <button class="calc-btn ghost" type="button" onclick="askAIAboutMoleProblem()">◈ Hỏi chatbot giải
+                thích</button>
+            </div>
+            <div class="solution-box" id="mole-solution"></div>
+          </div>
+          <div class="calc-card">
+            <div class="calc-title">Pha dung dịch</div>
+            <div class="calc-input-grid"><label class="calc-field"><span>Nồng độ cần pha (M)</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-target-m" type="number" min="0"
+                    step="any" placeholder="VD: 0.5" oninput="updateCalc()" /></div>
+              </label><label class="calc-field"><span>Thể tích cần pha</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-target-volume-l" type="number" min="0"
+                    step="any" placeholder="VD: 1" oninput="updateCalc()" /><select class="form-select calc-unit"
+                    id="calc-target-volume-unit" onchange="updateCalc()">
+                    <option value="mL">mL</option>
+                    <option value="L" selected>L</option>
+                  </select></div>
+              </label></div>
+            <div class="calc-results">
+              <div><span>Khối lượng cần cân</span><strong id="calc-result-grams-needed">--</strong></div>
+              <div><span>Số mol cần có</span><strong id="calc-result-target-moles">--</strong></div>
+            </div>
+            <div class="calc-actions">
+              <button class="calc-btn" type="button" onclick="showPreparationSolution()">📘 Xem lời giải từng
+                bước</button>
+              <button class="calc-btn ghost" type="button" onclick="askAIAboutPreparation()">◈ Hỏi chatbot giải
+                thích</button>
+            </div>
+            <div class="solution-box" id="preparation-solution"></div>
+          </div>
+          <div class="calc-card">
+            <div class="calc-title">Pha loãng C1V1 = C2V2</div>
+            <div class="calc-input-grid"><label class="calc-field"><span>Nồng độ gốc C1 (M)</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-stock-m" type="number" min="0" step="any"
+                    placeholder="VD: 12" oninput="updateCalc()" /></div>
+              </label><label class="calc-field"><span>Nồng độ đích C2 (M)</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-final-m" type="number" min="0" step="any"
+                    placeholder="VD: 1" oninput="updateCalc()" /></div>
+              </label><label class="calc-field"><span>Thể tích đích V2</span>
+                <div class="calc-field-row"><input class="form-input" id="calc-final-volume-l" type="number" min="0"
+                    step="any" placeholder="VD: 0.5" oninput="updateCalc()" /><select class="form-select calc-unit"
+                    id="calc-final-volume-unit" onchange="updateCalc()">
+                    <option value="mL">mL</option>
+                    <option value="L" selected>L</option>
+                  </select></div>
+              </label></div>
+            <div class="calc-results">
+              <div><span>Thể tích dung dịch gốc V1</span><strong id="calc-result-stock-volume">--</strong></div>
+              <div><span>Lượng dung môi thêm gần đúng</span><strong id="calc-result-solvent">--</strong></div>
+            </div>
+            <div class="calc-actions">
+              <button class="calc-btn" type="button" onclick="showDilutionSolution()">📘 Xem lời giải từng bước</button>
+              <button class="calc-btn ghost" type="button" onclick="askAIAboutDilution()">◈ Hỏi chatbot giải
+                thích</button>
+            </div>
+            <div class="solution-box" id="dilution-solution"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB: DATABASE ── -->
+    <section class="tab-panel" id="tab-database">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Cơ sở dữ liệu <span class="title-accent">Hóa chất</span></h1>
+          <p class="panel-sub">Tra cứu nhanh thông tin cơ bản các hóa chất phổ biến</p>
+        </div>
+        <button class="mol3d-db-btn" type="button" onclick="auditAllMol3D()">🧬 Kiểm tra toàn bộ mô hình 3D</button>
+      </div>
+      <div class="db-search-row">
+        <input class="db-search" type="text" placeholder="🔍  Tìm tên hoặc công thức hóa chất..."
+          oninput="filterDB(this.value)" />
+      </div>
+      <div class="db-grid" id="db-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">AI đang phân tích...</div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="chemdata.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.0.1/3Dmol-min.js"></script>
+  <script src="API.js"></script>
+  <script src="app.js"></script>
+  <script src="mol3d.js"></script>
+
+  <div id="api-modal"
+    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div
+      style="background: #1e1e24; padding: 24px; border-radius: 12px; width: 90%; max-width: 420px; border: 1px solid #333; color: #fff;">
+      <h3 style="margin-top: 0; font-size: 18px;">🔑 Cấu hình Gemini API</h3>
+      <p style="font-size: 13px; color: #aaa;">Lấy khóa API miễn phí tại: <a href="https://aistudio.google.com/"
+          target="_blank" style="color: #4da6ff;">Google AI Studio</a></p>
+
+      <div style="margin: 15px 0;">
+        <label style="display: block; font-size: 13px; margin-bottom: 6px;">Gemini API Key:</label>
+        <input type="password" id="api-key-input" placeholder="AIzaSy..."
+          style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box;" />
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button onclick="closeApiModal()"
+          style="padding: 8px 14px; border-radius: 6px; border: 1px solid #555; background: transparent; color: #ccc; cursor: pointer;">Hủy</button>
+        <button onclick="saveApiKey()"
+          style="padding: 8px 16px; border-radius: 6px; border: none; background: #2563eb; color: #fff; cursor: pointer; font-weight: 500;">Lưu
+          Key</button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,340 @@
+/* ═══════════════════════════════════════
+   MOL3D.CSS — Modal mô hình 3D hóa chất
+   Dùng lại biến màu / font đã khai báo trong :root của style.css
+═══════════════════════════════════════ */
+
+.mol3d-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.mol3d-trigger:hover {
+  background: rgba(0, 212, 168, 0.22);
+  transform: translateY(-1px);
+}
+
+.mol3d-db-btn {
+  margin-top: 8px;
+  padding: 5px 10px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mol3d-db-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mol3d-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(5, 7, 10, 0.75);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.mol3d-modal.visible {
+  display: flex;
+}
+
+.mol3d-box {
+  width: min(640px, 100%);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-bright);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.mol3d-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mol3d-title {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.mol3d-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mol3d-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.mol3d-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mol3d-style-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mol3d-style-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.mol3d-style-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.mol3d-viewport {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: #0f1420;
+}
+
+.mol3d-empty {
+  padding: 24px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.mol3d-empty a {
+  color: var(--accent);
+}
+
+.mol3d-foot {
+  padding: 10px 18px;
+  font-size: 11px;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 480px) {
+  .mol3d-viewport { height: 300px; }
+}
+
+/* ── Audit modal (kiểm tra toàn bộ mô hình 3D) ── */
+
+.mol3d-audit-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+}
+
+.mol3d-audit-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mol3d-audit-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 5px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.mol3d-audit-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.15s ease;
+}
+
+.mol3d-audit-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.mol3d-audit-summary {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+}
+
+.mol3d-audit-summary span.ok { color: #2ed573; }
+.mol3d-audit-summary span.partial { color: #ffa502; }
+.mol3d-audit-summary span.fail { color: #ff4757; }
+
+.mol3d-audit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mol3d-audit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.mol3d-audit-row.fail {
+  border-color: rgba(255, 71, 87, 0.35);
+  background: rgba(255, 71, 87, 0.08);
+}
+
+.mol3d-audit-row.partial {
+  border-color: rgba(255, 165, 2, 0.35);
+  background: rgba(255, 165, 2, 0.08);
+}
+
+.mol3d-audit-row-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.mol3d-audit-row-formula {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  margin-left: 6px;
+}
+
+.mol3d-audit-row-btn {
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mol3d-audit-row-btn:hover {
+  border-color: var(--accent);
+}
+
+.mol3d-audit-empty {
+  padding: 10px 2px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.mol3d-audit-copy-btn {
+  margin-top: 12px;
+}
+
+/* ── Lớp phủ: trục tọa độ, độ dài, góc liên kết ── */
+.mol3d-overlay-row {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mol3d-ov-btn {
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-family: var(--font-body);
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.mol3d-ov-btn.active {
+  color: #ffd166;
+  border-color: #c9a227;
+  background: rgba(255, 209, 102, 0.1);
+}
+
+.mol3d-axis-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.mol3d-axis-size input[type="range"] {
+  width: 90px;
+  accent-color: var(--accent);
+}
+
+.mol3d-axis-size span {
+  font-family: var(--font-mono);
+  min-width: 34px;
+  color: var(--text-primary);
+}
+
+.mol3d-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 8px 18px;
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+}
+
+.mol3d-info:empty { display: none; }
+.mol3d-info b { color: var(--text-primary); }
+.mol3d-info-pick { color: var(--accent); }
+.mol3d-info-pick b { color: var(--accent); }
+
+.mol3d-box { overflow-y: auto; }
+
+@media (max-width: 480px) {
+  .mol3d-axis-size { margin-left: 0; }
+}
