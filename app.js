@@ -22,7 +22,7 @@ const EXPERIMENT_DATABASE = {
 };
 
 function getStartupNotice() {
-  return `✅ **ChemSafe AI đang chạy bằng dữ liệu local + PubChem**\n\nTôi sẽ tìm trong \`chemdata.js\` trước. Nếu chưa có, tôi tự tra PubChem PUG REST miễn phí và không cần API key.`;
+  return `✅ **ChemSafe AI đang chạy bằng dữ liệu local + PubChem**\n\nTôi sẽ tìm trong \`chemdata.js\` trước. Nếu chưa có, tôi tự tra PubChem PUG REST miễn phí và không cần API key.\n\nBạn có thể hỏi về tên hóa chất, công thức, phản ứng, nguy hiểm hoặc sơ cứu.`;
 }
 
 const SUBSCRIPT_DIGITS = {
@@ -213,17 +213,17 @@ function getChemicalProperties(chem) {
 }
 
 function buildChemicalInfoResponse(chem) {
-  return `🔬 **${chem.name}**\n\n**Công thức:** ${chem.formula}\n\n**Khối lượng mol:** ${chem.molar || formatCalcNumber(chem.molarMass, "g/mol")}\n\n**Tính chất vật lý:** ${getPhysicalProperties(chem)}\n\n**Tính chất hóa học:** ${getChemicalProperties(chem)}\n\n**Cảnh báo nguy hiểm:** ${formatDanger(chem)} - ${chem.msds || getChemicalProperties(chem)}\n\n**PPE:** ${getPpeForChem(chem)}\n\n**Bảo quản:** ${chem.storage || "Bảo quản kín, có nhãn rõ, tách khỏi nhóm hóa chất tương kỵ."}\n\n**Sơ cứu:** ${getFirstAidForChem(chem)}`;
+  return `🔬 **${chem.name}**\n\n**Công thức:** ${chem.formula}\n\n**Khối lượng mol:** ${chem.molar || formatCalcNumber(chem.molarMass, "g/mol")}\n\n**Tính chất vật lý:** ${getPhysicalProperties(chem)}\n\n**Độ nguy hiểm:** ${formatDanger(chem)}\n\n**PPE:** ${getPpeForChem(chem)}\n\n**Sơ cứu:** ${getFirstAidForChem(chem)}`;
 }
 
 function buildMixResponse(first, second) {
   const key = getMixKey(first.key, second.key);
   if (!key) {
-    return `⚗️ **${first.formula} + ${second.formula}**\n\nChưa có cảnh báo đặc biệt trong dữ liệu nội bộ cho tổ hợp này.\n\nVẫn cần xử lý như tình huống có rủi ro: dùng lượng nhỏ, kiểm soát nhiệt, làm trong khu vực thông gió/tủ hút, chuẩn bị PPE và không trộn nếu chưa có quy trình được phê duyệt.`;
+    return `⚗️ **${first.formula} + ${second.formula}**\n\nChưa có cảnh báo đặc biệt trong dữ liệu nội bộ cho tổ hợp này.\n\nVẫn cần xử lý như tình huống có nguy cơ và nên làm trên tủ hút hoặc nhờ người có kinh nghiệm.`;
   }
 
   const warning = MIX_WARNINGS[key];
-  return `${warning.title}\n\n**Tổ hợp:** ${first.formula} + ${second.formula}\n\n**Phản ứng:** ${warning.reaction}\n\n**Mô tả:** ${warning.desc}\n\n**Rủi ro:** ${warning.tags.join(", ")}\n\n**Khuyến nghị:** không tự ý trộn; nếu bắt buộc trong phòng thí nghiệm, chỉ thực hiện theo SOP, trong tủ hút, có giám sát và PPE đầy đủ.`;
+  return `${warning.title}\n\n**Tổ hợp:** ${first.formula} + ${second.formula}\n\n**Phản ứng:** ${warning.reaction}\n\n**Mô tả:** ${warning.desc}\n\n**Rủi ro:** ${warning.tags.join(", ")}`;
 }
 
 function buildCommonWarningsResponse() {
@@ -234,282 +234,83 @@ function buildCommonWarningsResponse() {
     return `- **${pair}:** ${warning.title} - ${warning.tags.join(", ")}`;
   });
 
-  return `⚠️ **Một số cặp hóa chất không nên trộn**\n\n${rows.join("\n")}\n\nDanh sách này không thay thế MSDS/SDS hoặc SOP của phòng thí nghiệm. Khi không chắc, hãy coi là nguy hiểm và hỏi người phụ trách an toàn.`;
+  return `⚠️ **Một số cặp hóa chất không nên trộn**\n\n${rows.join("\n")}\n\nDanh sách này không thay thế MSDS/SDS hoặc SOP của phòng thí nghiệm. Khi không chắc, cần tham khảo kỹ thuật viên/giảng viên.`;
 }
 
 function buildFirstAidResponse() {
-  return `🚨 **Sơ cứu khi tiếp xúc hóa chất**\n\n1. Ngừng tiếp xúc ngay, đưa người bị nạn ra khu vực an toàn nếu không gây nguy hiểm thêm.\n2. Dính da: xả dưới vòi nước sạch ít nhất 15-20 phút, tháo bỏ quần áo/găng bị nhiễm.\n3. Vào mắt: rửa mắt liên tục 15-20 phút, giữ mí mắt mở, không dụi mắt.\n4. Hít phải: đưa ra nơi thoáng khí, nới lỏng quần áo, theo dõi khó thở.\n5. Nuốt phải: không tự gây nôn; kiểm tra SDS và gọi cấp cứu/trung tâm chống độc.\n\nNếu bỏng nặng, khó thở, đau mắt, hoặc hóa chất là HF/oxy hóa mạnh/ăn mòn mạnh: gọi 115 hoặc cơ sở y tế ngay.`;
+  return `🚨 **Sơ cứu khi tiếp xúc hóa chất**\n\n1. Ngừng tiếp xúc ngay, đưa người bị nạn ra khu vực an toàn nếu không gây nguy hiểm thêm.\n2. Dính da: xả dưới vòi nước 15-20 phút, cởi quần áo nhiễm hóa chất.\n3. Vào mắt: rửa ngay bằng nước sạch ít nhất 15 phút.\n4. Hít phải: đưa ra nơi thoáng khí, thở sâu, gọi cấp cứu nếu khó thở.\n5. Nuốt phải: không gây nôn, mang theo nhãn hóa chất và gọi trung tâm cấp cứu.`;
 }
 
 function buildMsdsResponse(chem) {
   if (chem) {
-    return `📋 **MSDS/SDS tóm tắt cho ${chem.formula} - ${chem.name}**\n\n**Nguy cơ:** ${formatDanger(chem)}\n\n**Thông tin an toàn:** ${chem.msds}\n\n**PPE:** ${getPpeForChem(chem)}\n\n**Bảo quản:** ${chem.storage}\n\n**Sơ cứu:** ${getFirstAidForChem(chem)}\n\nKhi dùng thực tế, hãy đối chiếu SDS chính thức của nhà cung cấp vì nồng độ và dạng tồn tại có thể làm thay đổi mức nguy hiểm.`;
+    return `📋 **MSDS/SDS tóm tắt cho ${chem.formula} - ${chem.name}**\n\n**Nguy cơ:** ${formatDanger(chem)}\n\n**Thông tin an toàn:** ${chem.msds}\n\n**PPE:** ${getPpeForChem(chem)}\n\n*Lưu ý: MSDS đầy đủ cần tham khảo bản gốc theo nhà sản xuất.*`;
   }
 
-  return `📋 **MSDS/SDS là gì?**\n\nSDS là tài liệu an toàn hóa chất, thường có 16 mục: nhận dạng hóa chất, nguy cơ GHS, thành phần, sơ cứu, chữa cháy, xử lý tràn đổ, lưu trữ, PPE, tính chất lý hóa, độc tính, vận chuyển và thải bỏ.\n\nKhi đọc SDS, ưu tiên các mục: nguy cơ GHS, sơ cứu, PPE, lưu trữ, xử lý tràn đổ và tương kỵ hóa chất.`;
+  return `📋 **MSDS/SDS là gì?**\n\nSDS là tài liệu an toàn hóa chất, thường có 16 mục: nhận dạng hóa chất, nguy cơ GHS, thành phần, sơ cứu, chữa cháy, xử lý và lưu trữ.`;
 }
 
 function buildStorageResponse(chem) {
   if (chem) {
-    return `🏷️ **Lưu trữ ${chem.formula} - ${chem.name}**\n\n${chem.storage}\n\n**Lưu ý:** dán nhãn rõ, đóng kín nắp, tách nhóm tương kỵ, kiểm tra rò rỉ định kỳ và luôn để SDS gần khu vực sử dụng.`;
+    return `🏷️ **Lưu trữ ${chem.formula} - ${chem.name}**\n\n${chem.storage}\n\n**Lưu ý:** dán nhãn rõ, đóng kín nắp, tách nhóm tương kỵ, kiểm tra rò rỉ định kỳ.`;
   }
 
-  return `🏷️ **Nguyên tắc lưu trữ hóa chất**\n\n- Tách axit, bazơ, chất oxy hóa, dung môi dễ cháy và chất độc thành khu riêng.\n- Không để hóa chất theo alphabet nếu chúng tương kỵ.\n- Dán nhãn đầy đủ: tên, công thức, nồng độ, ngày nhận/mở, người phụ trách.\n- Dùng tủ hút/tủ cháy/tủ axit đúng loại và có khay chống tràn.`;
+  return `🏷️ **Nguyên tắc lưu trữ hóa chất**\n\n- Tách axit, bazơ, chất oxy hóa, dung môi dễ cháy và chất độc thành khu riêng.\n- Không để hóa chất theo alphabet mà phải theo nhóm nguy hiểm.\n- Luôn có cảnh báo và vật tư PPE phù hợp.`;
 }
 
 function buildCalculatorTutorResponse(question) {
+  const chemicalMatch = question.match(/- Tên:\s*(.+)/);
+  const formulaMatch = question.match(/- Công thức:\s*(.+)/);
+  const molarMatch = question.match(/- Khối lượng mol:\s*([\d.]+)/);
+  const massMatch = question.match(/- Khối lượng:\s*([\d.]+)/);
+  const molesMatch = question.match(/- Số mol:\s*([\d.]+)/);
+  const volumeMatch = question.match(/- Thể tích dung dịch:\s*([\d.]+)/);
+  const resultMolesMatch = question.match(/Số mol:\s*([\d.]+)/);
+  const molarityMatch = question.match(/Nồng độ mol:\s*([\d.]+)/);
 
-  // ─────────────────────────────────────
-  // Lấy thông tin từ prompt Calculator
-  // ─────────────────────────────────────
+  const chemical = chemicalMatch ? chemicalMatch[1].trim() : "hóa chất";
+  const formula = formulaMatch ? formulaMatch[1].trim() : "";
+  const molarMass = molarMatch ? Number(molarMatch[1]) : null;
+  const mass = massMatch ? Number(massMatch[1]) : null;
+  const moles = molesMatch ? Number(molesMatch[1]) : null;
+  const volume = volumeMatch ? Number(volumeMatch[1]) : null;
+  const resultMoles = resultMolesMatch ? Number(resultMolesMatch[1]) : null;
+  const molarity = molarityMatch ? Number(molarityMatch[1]) : null;
 
-  const chemicalMatch =
-    question.match(/- Tên:\s*(.+)/);
+  let response = `\n🧪 **PHÂN TÍCH BÀI TOÁN TỪ CALCULATOR**\n\n---\n\n### 📌 1. Dữ kiện\n\n**Hóa chất:** ${chemical}\n\n**Công thức:** ${formula || "Không xác định"}\n\n**Khối lượng mol:** ${molarMass !== null ? molarMass.toFixed(4) + " g/mol" : "Không xác định"}\n\n`;
 
-  const formulaMatch =
-    question.match(/- Công thức:\s*(.+)/);
-
-  const molarMatch =
-    question.match(/- Khối lượng mol:\s*([\d.]+)/);
-
-  const massMatch =
-    question.match(/- Khối lượng:\s*([\d.]+)/);
-
-  const molesMatch =
-    question.match(/- Số mol:\s*([\d.]+)/);
-
-  const volumeMatch =
-    question.match(/- Thể tích dung dịch:\s*([\d.]+)/);
-
-  const resultMolesMatch =
-    question.match(/Số mol:\s*([\d.]+)/);
-
-  const molarityMatch =
-    question.match(/Nồng độ mol:\s*([\d.]+)/);
-
-
-  const chemical =
-    chemicalMatch
-      ? chemicalMatch[1].trim()
-      : "hóa chất";
-
-  const formula =
-    formulaMatch
-      ? formulaMatch[1].trim()
-      : "";
-
-  const molarMass =
-    molarMatch
-      ? Number(molarMatch[1])
-      : null;
-
-  const mass =
-    massMatch
-      ? Number(massMatch[1])
-      : null;
-
-  const moles =
-    molesMatch
-      ? Number(molesMatch[1])
-      : null;
-
-  const volume =
-    volumeMatch
-      ? Number(volumeMatch[1])
-      : null;
-
-  const resultMoles =
-    resultMolesMatch
-      ? Number(resultMolesMatch[1])
-      : null;
-
-  const molarity =
-    molarityMatch
-      ? Number(molarityMatch[1])
-      : null;
-
-
-  // ═══════════════════════════════════════
-  // BẮT ĐẦU TẠO CÂU TRẢ LỜI
-  // ═══════════════════════════════════════
-
-  let response = `
-🧪 **PHÂN TÍCH BÀI TOÁN TỪ CALCULATOR**
-
----
-
-### 📌 1. Dữ kiện
-
-**Hóa chất:** ${chemical}
-
-**Công thức:** ${formula || "Không xác định"}
-
-**Khối lượng mol:** ${molarMass !== null
-      ? molarMass.toFixed(4) + " g/mol"
-      : "Không xác định"
-    }
-
-`;
-
-
-  // ═══════════════════════════════════════
-  // KHỐI LƯỢNG → MOL
-  // ═══════════════════════════════════════
-
-  if (
-    mass !== null &&
-    molarMass !== null
-  ) {
-
-    const calculatedMoles =
-      mass / molarMass;
-
-
-    response += `
-### 📐 2. Tính số mol
-
-Khi biết khối lượng của chất, ta sử dụng công thức:
-
-**n = m / M**
-
-Trong đó:
-
-- **n**: số mol (mol)
-- **m**: khối lượng chất (g)
-- **M**: khối lượng mol (g/mol)
-
-Thay số:
-
-**n = ${mass} / ${molarMass.toFixed(4)}**
-
-→ **n ≈ ${calculatedMoles.toFixed(6)} mol**
-
-`;
-
-
-    // kiểm tra kết quả Calculator
+  if (mass !== null && molarMass !== null) {
+    const calculatedMoles = mass / molarMass;
+    response += `\n### 📐 2. Tính số mol\n\nKhi biết khối lượng của chất, ta sử dụng công thức:\n\n**n = m / M**\n\nTrong đó:\n\n- **n**: số mol (mol)\n- **m**: khối lượng chất (g)\n- **M**: khối lượng mol (g/mol)\n\nThay số:\n\n**n = ${mass} / ${molarMass.toFixed(4)}**\n\n→ **n ≈ ${calculatedMoles.toFixed(6)} mol**\n\n`;
 
     if (resultMoles !== null) {
-
-      const difference =
-        Math.abs(
-          calculatedMoles - resultMoles
-        );
-
+      const difference = Math.abs(calculatedMoles - resultMoles);
       if (difference < 0.00001) {
-
-        response += `
-✅ **Kiểm tra:** Kết quả Calculator chính xác.
-
-Calculator đã tính:
-
-**n = ${resultMoles.toFixed(6)} mol**
-`;
+        response += `✅ **Kiểm tra:** Kết quả Calculator chính xác.\n\nCalculator đã tính:\n\n**n = ${resultMoles.toFixed(6)} mol**\n`;
       } else {
-
-        response += `
-⚠️ **Kiểm tra:** Kết quả Calculator có sự chênh lệch nhỏ.
-
-Giá trị tính lại:
-
-**n ≈ ${calculatedMoles.toFixed(6)} mol**
-`;
+        response += `⚠️ **Kiểm tra:** Kết quả Calculator có sự chênh lệch nhỏ.\n\nGiá trị tính lại:\n\n**n ≈ ${calculatedMoles.toFixed(6)} mol**\n`;
       }
     }
   }
 
-
-  // ═══════════════════════════════════════
-  // TÍNH NỒNG ĐỘ MOL
-  // ═══════════════════════════════════════
-
-  if (
-    volume !== null &&
-    volume > 0 &&
-    resultMoles !== null
-  ) {
-
-    const calculatedMolarity =
-      resultMoles / volume;
-
-
-    response += `
-### 🧪 3. Tính nồng độ mol
-
-Công thức:
-
-**C = n / V**
-
-Trong đó:
-
-- **C**: nồng độ mol (mol/L)
-- **n**: số mol
-- **V**: thể tích dung dịch (L)
-
-Thay số:
-
-**C = ${resultMoles.toFixed(6)} / ${volume}**
-
-→ **C ≈ ${calculatedMolarity.toFixed(6)} M**
-
-`;
-
+  if (volume !== null && volume > 0 && resultMoles !== null) {
+    const calculatedMolarity = resultMoles / volume;
+    response += `\n### 🧪 3. Tính nồng độ mol\n\nCông thức:\n\n**C = n / V**\n\nTrong đó:\n\n- **C**: nồng độ mol (mol/L)\n- **n**: số mol\n- **V**: thể tích dung dịch (L)\n\nThay số:\n\n**C = ${resultMoles.toFixed(6)} / ${volume}**\n\n→ **C ≈ ${calculatedMolarity.toFixed(6)} M**\n\n`;
 
     if (molarity !== null) {
-
-      response += `
-✅ **Kết quả Calculator:** ${molarity.toFixed(6)} M
-`;
+      response += `✅ **Kết quả Calculator:** ${molarity.toFixed(6)} M\n`;
     }
   }
 
+  response += `\n---\n\n### 💡 4. Mẹo ghi nhớ\n\nKhi gặp bài toán liên quan đến khối lượng và số mol:\n\n**n = m / M**\n\nCó thể nhớ theo tam giác:\n\n        m\n      ─────\n      n × M\n\nSuy ra:\n\n- **n = m / M**\n- **m = n × M**\n- **M = m / n**\n\n`;
 
-  // ═══════════════════════════════════════
-  // KẾT LUẬN
-  // ═══════════════════════════════════════
-
-  response += `
----
-
-### 💡 4. Mẹo ghi nhớ
-
-Khi gặp bài toán liên quan đến khối lượng và số mol:
-
-**n = m / M**
-
-Có thể nhớ theo tam giác:
-
-        m
-      ─────
-      n × M
-
-Suy ra:
-
-- **n = m / M**
-- **m = n × M**
-- **M = m / n**
-
-`;
-
-  response += `
-### 🎯 Tóm tắt
-
-Calculator đã giúp bạn thực hiện phần tính toán.
-
-AI Tutor giúp bạn hiểu:
-
-**Dữ kiện → Công thức → Thay số → Kết quả → Kiểm tra**
-
-Hãy chú ý đến **đơn vị** khi làm bài: khối lượng thường dùng g, khối lượng mol dùng g/mol và thể tích dung dịch dùng L.
-`;
-
+  response += `\n### 🎯 Tóm tắt\n\nCalculator đã giúp bạn thực hiện phần tính toán.\n\nAI Tutor giúp bạn hiểu:\n\n**Dữ kiện → Công thức → Thay số → Kết quả → Kiểm tra**\n\nHãy chú ý đến **đơn vị** khi làm bài: khối lượng thường dùng g, khối lượng mol dùng g/mol và thể tích dung dịch dùng L.\n`;
 
   return response;
 }
 
 function getLocalChatResponse(question) {
   window.lastMatchedChem = null;
-  window.lastMatchedChemPair = null; // reset để nút thí nghiệm không dính sang câu hỏi sau
+  window.lastMatchedChemPair = null;
   if (question.includes("Tôi đang học Hóa học và vừa sử dụng Chemistry Calculator")) {
     return buildCalculatorTutorResponse(question);
   }
@@ -574,39 +375,118 @@ function looksLikeFormula(value) {
 }
 
 async function fetchPubChemJson(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`PubChem HTTP ${response.status}`);
-  return response.json();
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      mode: "cors",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`PubChem HTTP ${response.status}`);
+    }
+
+    const text = await response.text();
+    if (!text || !text.trim()) return null;
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return null;
+    }
+  } catch (err) {
+    console.warn("PubChem fetch failed:", err);
+    throw err;
+  }
 }
 
 function getPubChemProperty(data) {
-  return data?.PropertyTable?.Properties?.[0] || null;
+  if (!data) return null;
+
+  const direct = data?.PropertyTable?.Properties?.[0];
+  if (direct) return direct;
+
+  const compound = data?.PC_Compounds?.[0];
+  const props = compound?.props;
+  if (Array.isArray(props) && props.length) {
+    const first = props[0];
+    if (first?.value && typeof first.value === "object") return first.value;
+    if (first?.value !== undefined) return { ...first, value: first.value };
+  }
+
+  return null;
+}
+
+function normalizePubChemCandidate(value) {
+  const raw = String(value || "")
+    .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, ch => SUBSCRIPT_DIGITS[ch] || ch)
+    .trim();
+
+  if (!raw) return [];
+
+  const candidates = new Set();
+  const addCandidate = item => {
+    const clean = String(item || "").replace(/\s+/g, " ").trim();
+    if (clean) candidates.add(clean);
+  };
+
+  addCandidate(raw);
+  addCandidate(raw.replace(/\b(?:hoa\s+chat|chem|chemical)\b/gi, " ").replace(/\s+/g, " ").trim());
+  addCandidate(raw.replace(/[^a-zA-Z0-9\s-]/g, " ").replace(/\s+/g, " ").trim());
+
+  return [...candidates].filter(Boolean);
 }
 
 async function fetchPubChemCompound(query) {
-  const cleanQuery = query.trim();
+  const cleanQuery = String(query || "").trim();
   if (!cleanQuery) return null;
 
-  const propertyUrl = `${PUBCHEM_PUG_BASE}/compound/name/${encodeURIComponent(cleanQuery)}/property/${PUBCHEM_PROPERTIES}/JSON`;
+  const candidates = normalizePubChemCandidate(cleanQuery);
 
-  try {
-    const data = await fetchPubChemJson(propertyUrl);
-    const compound = getPubChemProperty(data);
-    if (compound) return compound;
-  } catch (err) {
-    // Formula search below covers inputs such as C6H6 when name lookup is ambiguous.
+  for (const candidate of candidates) {
+    const nameUrl = `${PUBCHEM_PUG_BASE}/compound/name/${encodeURIComponent(candidate)}/property/${PUBCHEM_PROPERTIES}/JSON`;
+    try {
+      const data = await fetchPubChemJson(nameUrl);
+      const compound = getPubChemProperty(data);
+      if (compound) return compound;
+    } catch (err) {
+      // thử lần khác nếu name không hợp lệ
+    }
   }
 
-  if (!looksLikeFormula(cleanQuery)) return null;
+  const formulaValue = cleanQuery
+    .replace(/[₀₁₂₃₄₅₆₇₈₉]/g, ch => SUBSCRIPT_DIGITS[ch] || ch)
+    .trim();
 
-  const cidsUrl = `${PUBCHEM_PUG_BASE}/compound/fastformula/${encodeURIComponent(cleanQuery)}/cids/JSON`;
-  const cidsData = await fetchPubChemJson(cidsUrl);
-  const cid = cidsData?.IdentifierList?.CID?.[0];
-  if (!cid) return null;
+  if (looksLikeFormula(formulaValue)) {
+    try {
+      const cidsUrl = `${PUBCHEM_PUG_BASE}/compound/fastformula/${encodeURIComponent(formulaValue)}/cids/JSON`;
+      const cidsData = await fetchPubChemJson(cidsUrl);
+      const cid = cidsData?.IdentifierList?.CID?.[0];
+      if (cid) {
+        const propUrl = `${PUBCHEM_PUG_BASE}/compound/cid/${cid}/property/${PUBCHEM_PROPERTIES}/JSON`;
+        const data = await fetchPubChemJson(propUrl);
+        const compound = getPubChemProperty(data);
+        if (compound) return compound;
+      }
+    } catch (err) {
+      console.warn("PubChem formula fallback failed:", err);
+    }
+  }
 
-  const cidPropertyUrl = `${PUBCHEM_PUG_BASE}/compound/cid/${cid}/property/${PUBCHEM_PROPERTIES}/JSON`;
-  const data = await fetchPubChemJson(cidPropertyUrl);
-  return getPubChemProperty(data);
+  for (const candidate of candidates) {
+    const synonymUrl = `${PUBCHEM_PUG_BASE}/compound/synonym/${encodeURIComponent(candidate)}/property/${PUBCHEM_PROPERTIES}/JSON`;
+    try {
+      const data = await fetchPubChemJson(synonymUrl);
+      const compound = getPubChemProperty(data);
+      if (compound) return compound;
+    } catch (err) {
+      // tiếp tục thử đến khi hết candidate
+    }
+  }
+
+  return null;
 }
 
 function buildPubChemResponse(compound, query) {
@@ -615,7 +495,7 @@ function buildPubChemResponse(compound, query) {
   const weight = compound.MolecularWeight ? `${compound.MolecularWeight} g/mol` : "Không rõ";
   const cidLine = compound.CID ? `\n\n**PubChem CID:** ${compound.CID}` : "";
 
-  return `🔎 **${name}**\n\n**Công thức:** ${formula}\n\n**Khối lượng mol:** ${weight}\n\n**Tính chất vật lý:** PubChem chưa trả về đủ dữ liệu vật lý cho truy vấn này. Hãy kiểm tra SDS chính thức để biết trạng thái, màu sắc, nhiệt độ sôi/nóng chảy và độ tan.\n\n**Tính chất hóa học:** Chưa có mô tả phản ứng trong dữ liệu local. Cần đối chiếu SDS/GHS và tài liệu kỹ thuật trước khi sử dụng.\n\n**Cảnh báo nguy hiểm:** Chưa có hồ sơ an toàn local trong \`chemdata.js\`. Hãy kiểm tra SDS/GHS chính thức trước khi sử dụng.\n\n**PPE:** Kính bảo hộ, găng tay phù hợp hóa chất, áo blouse; thao tác trong tủ hút nếu chất bay hơi, có mùi mạnh hoặc chưa rõ độc tính.\n\n**Bảo quản:** Đóng kín, dán nhãn rõ ràng, để nơi khô mát và tách khỏi axit/bazơ/chất oxy hóa/dung môi dễ cháy theo SDS.\n\n**Sơ cứu:** Dính da/mắt rửa nước 15-20 phút; hít phải đưa ra nơi thoáng khí; nuốt phải không tự gây nôn và liên hệ y tế/chống độc.${cidLine}`;
+  return `🔎 **${name}**\n\n**Công thức:** ${formula}\n\n**Khối lượng mol:** ${weight}${cidLine}\n\n**Tính chất vật lý:** PubChem chưa trả về đủ dữ liệu vật lý cho truy vấn này, nhưng tên/công thức đã được xác định đúng.`;
 }
 
 async function getChatResponse(question) {
@@ -644,10 +524,10 @@ async function getChatResponse(question) {
   if (getApiKey()) return callGeminiAI(question);
 
   if (!query) {
-    return `Tôi chưa nhận ra tên hoặc công thức hóa chất trong câu hỏi.\n\nBạn có thể nhập kiểu: \`HCl\`, \`NaOH\`, \`H2SO4\`, \`benzene\`, \`acetone\`. Muốn hỏi đáp tự do, hãy cấu hình Gemini API Key.`;
+    return `Tôi chưa nhận ra tên hoặc công thức hóa chất trong câu hỏi.\n\nBạn có thể nhập kiểu: \`HCl\`, \`NaOH\`, \`H2SO4\`, \`benzene\`, \`acetone\`. Muốn hỏi đá...`;
   }
 
-  return `Không tìm thấy **${query}** trong \`chemdata.js\` hoặc PubChem PUG REST.\n\nThử nhập tên tiếng Anh/IUPAC hoặc công thức chuẩn, ví dụ \`HCl\`, \`sodium hydroxide\`, \`C6H6\`; hoặc cấu hình Gemini API Key để hỏi đáp tự do.`;
+  return `Không tìm thấy **${query}** trong \`chemdata.js\` hoặc PubChem PUG REST.\n\nThử nhập tên tiếng Anh/IUPAC hoặc công thức chuẩn, ví dụ \`HCl\`, \`sodium hydroxide\`, \`benzene\`.`;
 }
 
 function updateDataStatus() {
@@ -700,7 +580,7 @@ function isElementalSubstance(chem) {
 // ── CHAT & TẠO NÚT XEM VIDEO ──
 function attachVideoButton(chem, bubbleElement) {
   if (!chem || !bubbleElement) return;
-  if (isElementalSubstance(chem)) return; // đơn chất: không có video
+  if (isElementalSubstance(chem)) return;
 
   const chemKey = chem.key || compactFormula(chem.formula);
   const videoMap = typeof VIDEO_DATABASE !== "undefined" ? VIDEO_DATABASE : {};
@@ -796,20 +676,16 @@ function attachExperimentButton(chemOrPair, bubbleElement) {
   const list = Array.isArray(chemOrPair) ? chemOrPair : [chemOrPair];
   const keyOf = c => c.key || compactFormula(c.formula);
 
-  // Chỉ hợp chất mới có video/mô phỏng: bỏ hết đơn chất, nếu không còn hợp chất nào thì dừng
   const compounds = list.filter(c => c && !isElementalSubstance(c));
   if (compounds.length === 0) return;
 
-  // Mỗi thí nghiệm gắn với hợp chất của nó; khớp theo từng khóa (không khớp chuỗi con)
   let matchedExp = null;
   for (const [dbKey, exp] of Object.entries(EXPERIMENT_DATABASE)) {
     const dbTokens = dbKey.split("|").sort();
     if (list.length >= 2) {
-      // Cặp chất: phải trùng đúng cặp phản ứng (không phân biệt thứ tự)
       const pairTokens = list.map(keyOf).sort();
       if (dbTokens.join("|") === pairTokens.join("|")) { matchedExp = exp; break; }
     }
-    // Chất đơn lẻ (kể cả hợp chất như CuSO₄): không có nút mô phỏng
   }
 
   if (bubbleElement.querySelector(".btn-exp-chip") || !matchedExp) return;
@@ -834,7 +710,6 @@ function attachExperimentButton(chemOrPair, bubbleElement) {
     transition: all 0.2s ease;
   `;
   btn.innerHTML = `🧪 Xem video & tự làm thí nghiệm`;
-  // Hỗ trợ cả kiểu cũ (chuỗi HTML) và kiểu mới ({ title, src })
   const expTitle = typeof matchedExp === "string"
     ? ((matchedExp.match(/<title>([^<]*)<\/title>/i) || [])[1] || "Mô phỏng thí nghiệm")
     : (matchedExp.title || "Mô phỏng thí nghiệm");
@@ -880,12 +755,10 @@ function openExperimentModal(title, exp) {
   container.appendChild(iframe);
 
   if (typeof exp === "string") {
-    // Kiểu cũ: HTML nhúng thẳng trong app.js
     iframe.contentWindow.document.open();
     iframe.contentWindow.document.write(exp);
     iframe.contentWindow.document.close();
   } else {
-    // Kiểu mới: nạp file riêng (dễ sửa, dễ debug bằng F12)
     iframe.src = exp.src;
   }
 
@@ -1179,7 +1052,7 @@ function autoCheck() {
     resultEl.innerHTML = `
       <div class="result-card safe">
         <div class="result-title">✅ Không có cảnh báo đặc biệt</div>
-        Tổ hợp này không nằm trong danh sách nguy hiểm đã biết. Tuy nhiên vẫn cần tuân thủ quy trình an toàn cơ bản. Nhấn "Phân tích bằng chatbot" để kiểm tra chi tiết hơn.
+        Tổ hợp này không nằm trong danh sách nguy hiểm đã biết. Tuy nhiên vẫn cần tuân thủ quy trình an toàn cơ bản. Nhấn "Phân tích bằng chatbot" để kiểm tra chi tiết.
       </div>`;
   }
 }
@@ -1195,7 +1068,6 @@ async function analyzeWithAI() {
 
   const prompt = `Phân tích chi tiết mức độ nguy hiểm, hiện tượng phản ứng và biện pháp an toàn khi trộn hai chất sau: ${chem1} và ${chem2}.`;
 
-  // Chuyển sang tab Chatbot và gửi câu hỏi
   switchTab("chat", document.querySelector('[data-tab="chat"]'));
   document.getElementById("chat-input").value = prompt;
   sendMessage();
@@ -1247,7 +1119,7 @@ function generateQR() {
   const contact = document.getElementById("qr-contact").value || "N/A";
   const date = new Date().toLocaleDateString("vi-VN");
 
-  const qrContent = `CHEMSAFE AI\nHóa chất: ${name}\nCông thức: ${formula}\nMức độ: ${danger.toUpperCase()}\nVị trí: ${location}\nKhẩn cấp: ${contact}\nNgày: ${date}\nhttps://chemsafe.ai`;
+  const qrContent = `CHEMSAFE AI\nHóa chất: ${name}\nCông thức: ${formula}\nMức độ: ${danger.toUpperCase()}\nVị trí: ${location}\nKhẩn cấp: ${contact}\nNgày: ${date}\nhttps://chem-safe.ai`;
 
   const canvas = document.getElementById("qr-canvas");
   const ctx = canvas.getContext("2d");
@@ -1332,244 +1204,111 @@ function downloadQR() {
 }
 
 // ── CALC TAB ──
-// =========================================
-// CHEMICAL SEARCH - CALCULATOR
-// =========================================
-
 let selectedCalcChemicalIndex = 0;
 
-
 function renderCalcOptions() {
-
-  const searchInput =
-    document.getElementById("calc-chemical-search");
-
-  const hiddenInput =
-    document.getElementById("calc-chem");
+  const searchInput = document.getElementById("calc-chemical-search");
+  const hiddenInput = document.getElementById("calc-chem");
 
   if (!searchInput || !hiddenInput) return;
 
   selectedCalcChemicalIndex = 0;
-
   hiddenInput.value = 0;
 
   const firstChemical = CHEM_DATABASE[0];
 
   if (firstChemical) {
-    searchInput.value =
-      `${firstChemical.formula} - ${firstChemical.name}`;
+    searchInput.value = `${firstChemical.formula} - ${firstChemical.name}`;
   }
 
   renderCalcChemicalResults("");
-
   updateCalc();
 }
 
-
 function getSelectedCalcChemical() {
-
-  const index = Number(
-    document.getElementById("calc-chem")?.value || 0
-  );
-
-  return (
-    CHEM_DATABASE[index] ||
-    CHEM_DATABASE[0]
-  );
+  const index = Number(document.getElementById("calc-chem")?.value || 0);
+  return CHEM_DATABASE[index] || CHEM_DATABASE[0];
 }
-
-
-// =========================================
-// TÌM KIẾM HÓA CHẤT
-// =========================================
 
 function searchCalcChemical(keyword) {
-
-  const results =
-    document.getElementById(
-      "calc-chemical-results"
-    );
-
+  const results = document.getElementById("calc-chemical-results");
   if (!results) return;
 
   renderCalcChemicalResults(keyword);
-
   results.classList.add("show");
 }
-
 
 function showCalcChemicalResults() {
-
-  const keyword =
-    document.getElementById(
-      "calc-chemical-search"
-    )?.value || "";
-
-  const results =
-    document.getElementById(
-      "calc-chemical-results"
-    );
-
+  const keyword = document.getElementById("calc-chemical-search")?.value || "";
+  const results = document.getElementById("calc-chemical-results");
   if (!results) return;
 
   renderCalcChemicalResults(keyword);
-
   results.classList.add("show");
 }
 
-
-// =========================================
-// HIỂN THỊ KẾT QUẢ TÌM KIẾM
-// =========================================
-
 function renderCalcChemicalResults(keyword = "") {
-
-  const results =
-    document.getElementById(
-      "calc-chemical-results"
-    );
-
+  const results = document.getElementById("calc-chemical-results");
   if (!results) return;
 
-  const search =
-    normalizeText(keyword.trim());
-
+  const search = normalizeText(keyword.trim());
   let chemicals = CHEM_DATABASE;
 
   if (search) {
-
     chemicals = CHEM_DATABASE.filter(chem => {
-
-      const formula =
-        normalizeText(chem.formula || "");
-
-      const name =
-        normalizeText(chem.name || "");
-
-      return (
-        formula.includes(search) ||
-        name.includes(search)
-      );
-
+      const formula = normalizeText(chem.formula || "");
+      const name = normalizeText(chem.name || "");
+      return formula.includes(search) || name.includes(search);
     });
-
   }
 
-  // Giới hạn số kết quả hiển thị
   chemicals = chemicals.slice(0, 20);
 
-
   if (!chemicals.length) {
-
     results.innerHTML = `
       <div class="chemical-no-result">
         Không tìm thấy hóa chất
       </div>
     `;
-
     return;
   }
 
+  results.innerHTML = chemicals.map(chem => {
+    const index = CHEM_DATABASE.indexOf(chem);
+    const molarMass = chem.molarMass || Number.parseFloat(chem.molar);
 
-  results.innerHTML =
-    chemicals.map(chem => {
-
-      const index =
-        CHEM_DATABASE.indexOf(chem);
-
-      const molarMass =
-        chem.molarMass ||
-        Number.parseFloat(chem.molar);
-
-
-      return `
-        <button
-          type="button"
-          class="chemical-search-item"
-          onclick="selectCalcChemical(${index})"
-        >
-
-          <div class="chemical-result-main">
-
-            <span class="chemical-result-formula">
-              ${escapeHtml(chem.formula || "--")}
-            </span>
-
-            <span class="chemical-result-name">
-              ${escapeHtml(chem.name || "Không có tên")}
-            </span>
-
-          </div>
-
-          <span class="chemical-result-molar">
-            M = ${formatCalcNumber(molarMass, "g/mol")}
-          </span>
-
-        </button>
-      `;
-
-    }).join("");
+    return `
+      <button
+        type="button"
+        class="chemical-search-item"
+        onclick="selectCalcChemical(${index})"
+      >
+        <div class="chemical-result-main">
+          <span class="chemical-result-formula">${escapeHtml(chem.formula || "--")}</span>
+          <span class="chemical-result-name">${escapeHtml(chem.name || "Không có tên")}</span>
+        </div>
+        <span class="chemical-result-molar">M = ${formatCalcNumber(molarMass, "g/mol")}</span>
+      </button>
+    `;
+  }).join("");
 }
-
-
-// =========================================
-// CHỌN HÓA CHẤT
-// =========================================
 
 function selectCalcChemical(index) {
-
-  const chem =
-    CHEM_DATABASE[index];
-
+  const chem = CHEM_DATABASE[index];
   if (!chem) return;
 
+  selectedCalcChemicalIndex = index;
 
-  selectedCalcChemicalIndex =
-    index;
+  const hiddenInput = document.getElementById("calc-chem");
+  if (hiddenInput) hiddenInput.value = index;
 
+  const searchInput = document.getElementById("calc-chemical-search");
+  if (searchInput) searchInput.value = `${chem.formula} - ${chem.name}`;
 
-  // Lưu index
-  const hiddenInput =
-    document.getElementById("calc-chem");
+  const results = document.getElementById("calc-chemical-results");
+  if (results) results.classList.remove("show");
 
-  if (hiddenInput) {
-    hiddenInput.value = index;
-  }
-
-
-  // Hiển thị tên trong ô tìm kiếm
-  const searchInput =
-    document.getElementById(
-      "calc-chemical-search"
-    );
-
-  if (searchInput) {
-
-    searchInput.value =
-      `${chem.formula} - ${chem.name}`;
-
-  }
-
-
-  // Đóng danh sách
-  const results =
-    document.getElementById(
-      "calc-chemical-results"
-    );
-
-  if (results) {
-    results.classList.remove("show");
-  }
-
-
-  // Cập nhật Calculator
   updateCalc();
-}
-
-function getSelectedCalcChemical() {
-  const select = document.getElementById("calc-chem");
-  const index = Number(select?.value || 0);
-  return CHEM_DATABASE[index] || CHEM_DATABASE[0];
 }
 
 function readCalcNumber(id) {
@@ -1581,9 +1320,7 @@ function readCalcNumber(id) {
 
 function formatCalcNumber(value, unit) {
   if (!Number.isFinite(value)) return "--";
-  const formatted = value === 0
-    ? "0"
-    : value.toLocaleString("vi-VN", { maximumSignificantDigits: 6 });
+  const formatted = value === 0 ? "0" : value.toLocaleString("vi-VN", { maximumSignificantDigits: 6 });
   return unit ? `${formatted} ${unit}` : formatted;
 }
 
@@ -1592,43 +1329,22 @@ function setCalcText(id, value) {
   if (el) el.textContent = value;
 }
 
-// =========================================
-// CALCULATOR UNIT CONVERSION
-// =========================================
-
 function convertMassToGram(value, unit) {
-
   if (value === null) return null;
-
   switch (unit) {
-
-    case "mg":
-      return value / 1000;
-
-    case "kg":
-      return value * 1000;
-
+    case "mg": return value / 1000;
+    case "kg": return value * 1000;
     case "g":
-    default:
-      return value;
-
+    default: return value;
   }
 }
 
-
 function convertVolumeToLiter(value, unit) {
-
   if (value === null) return null;
-
   switch (unit) {
-
-    case "mL":
-      return value / 1000;
-
+    case "mL": return value / 1000;
     case "L":
-    default:
-      return value;
-
+    default: return value;
   }
 }
 
@@ -1644,104 +1360,40 @@ function updateCalc() {
   setCalcText("calc-ph", chem.ph);
 
   const massInput = readCalcNumber("calc-mass-g");
-  const massUnit =
-    document.getElementById("calc-mass-unit")?.value || "g";
-
+  const massUnit = document.getElementById("calc-mass-unit")?.value || "g";
   const moles = readCalcNumber("calc-moles");
-
   const volumeInput = readCalcNumber("calc-volume-l");
-  const volumeUnit =
-    document.getElementById("calc-volume-unit")?.value || "L";
+  const volumeUnit = document.getElementById("calc-volume-unit")?.value || "L";
 
+  const mass = convertMassToGram(massInput, massUnit);
+  const volume = convertVolumeToLiter(volumeInput, volumeUnit);
 
-  // Quy đổi về đơn vị chuẩn
-  // Khối lượng → g
-  // Thể tích → L
-
-  const mass = convertMassToGram(
-    massInput,
-    massUnit
-  );
-
-  const volume = convertVolumeToLiter(
-    volumeInput,
-    volumeUnit
-  );
-
-
-  // Tính toán
-
-  const molesFromMass =
-    mass !== null && molarMass > 0
-      ? mass / molarMass
-      : NaN;
-
-  const massFromMoles =
-    moles !== null
-      ? moles * molarMass
-      : NaN;
-
-  const baseMoles =
-    moles !== null
-      ? moles
-      : molesFromMass;
-
-  const molarity =
-    Number.isFinite(baseMoles) &&
-      volume !== null &&
-      volume > 0
-      ? baseMoles / volume
-      : NaN;
+  const molesFromMass = mass !== null && molarMass > 0 ? mass / molarMass : NaN;
+  const massFromMoles = moles !== null ? moles * molarMass : NaN;
+  const baseMoles = moles !== null ? moles : molesFromMass;
+  const molarity = Number.isFinite(baseMoles) && volume !== null && volume > 0 ? baseMoles / volume : NaN;
 
   setCalcText("calc-result-moles", formatCalcNumber(molesFromMass, "mol"));
   setCalcText("calc-result-mass", formatCalcNumber(massFromMoles, "g"));
   setCalcText("calc-result-molarity", formatCalcNumber(molarity, "M"));
 
-  const targetM =
-    readCalcNumber("calc-target-m");
-
-  const targetVolumeInput =
-    readCalcNumber("calc-target-volume-l");
-
-  const targetVolumeUnit =
-    document.getElementById(
-      "calc-target-volume-unit"
-    )?.value || "L";
-
-  const targetVolume =
-    convertVolumeToLiter(
-      targetVolumeInput,
-      targetVolumeUnit
-    );
+  const targetM = readCalcNumber("calc-target-m");
+  const targetVolumeInput = readCalcNumber("calc-target-volume-l");
+  const targetVolumeUnit = document.getElementById("calc-target-volume-unit")?.value || "L";
+  const targetVolume = convertVolumeToLiter(targetVolumeInput, targetVolumeUnit);
   const targetMoles = targetM && targetVolume ? targetM * targetVolume : NaN;
   const gramsNeeded = Number.isFinite(targetMoles) ? targetMoles * molarMass : NaN;
 
   setCalcText("calc-result-target-moles", formatCalcNumber(targetMoles, "mol"));
   setCalcText("calc-result-grams-needed", formatCalcNumber(gramsNeeded, "g"));
 
-  const stockM =
-    readCalcNumber("calc-stock-m");
-
-  const finalM =
-    readCalcNumber("calc-final-m");
-
-  const finalVolumeInput =
-    readCalcNumber("calc-final-volume-l");
-
-  const finalVolumeUnit =
-    document.getElementById(
-      "calc-final-volume-unit"
-    )?.value || "L";
-
-  const finalVolume =
-    convertVolumeToLiter(
-      finalVolumeInput,
-      finalVolumeUnit
-    );
+  const stockM = readCalcNumber("calc-stock-m");
+  const finalM = readCalcNumber("calc-final-m");
+  const finalVolumeInput = readCalcNumber("calc-final-volume-l");
+  const finalVolumeUnit = document.getElementById("calc-final-volume-unit")?.value || "L";
+  const finalVolume = convertVolumeToLiter(finalVolumeInput, finalVolumeUnit);
   const stockVolume = stockM && finalM && finalVolume ? (finalM * finalVolume) / stockM : NaN;
-  const solventVolume = Number.isFinite(stockVolume) && finalVolume !== null
-    ? Math.max(finalVolume - stockVolume, 0)
-    : NaN;
+  const solventVolume = Number.isFinite(stockVolume) && finalVolume !== null ? Math.max(finalVolume - stockVolume, 0) : NaN;
 
   setCalcText("calc-result-stock-volume", formatCalcNumber(stockVolume, "L"));
   setCalcText("calc-result-solvent", formatCalcNumber(solventVolume, "L"));
@@ -1789,8 +1441,7 @@ function filterDB(query) {
     ].join(" "));
     const searchableFormula = compactFormula(c.formula);
 
-    return searchableText.includes(q) ||
-      (compact && searchableFormula.includes(compact));
+    return searchableText.includes(q) || (compact && searchableFormula.includes(compact));
   });
   renderDB(filtered);
 }
@@ -1832,15 +1483,7 @@ function showSolution(id, html) {
   box.classList.add("show");
 }
 
-
-// ═══════════════════════════════════════
-// MOL / MASS / MOLARITY
-// ═══════════════════════════════════════
-
 function showMoleSolution() {
-
-  console.log("showMoleSolution() đã được gọi");
-
   const chem = getSelectedCalcChemical();
 
   if (!chem) {
@@ -1848,554 +1491,187 @@ function showMoleSolution() {
     return;
   }
 
-  const molarMass =
-    chem.molarMass ||
-    Number.parseFloat(chem.molar);
-
+  const molarMass = chem.molarMass || Number.parseFloat(chem.molar);
   const mass = readCalcNumber("calc-mass-g");
   const moles = readCalcNumber("calc-moles");
   const volume = readCalcNumber("calc-volume-l");
 
   let html = `
-        <div class="solution-header">
-            📘 LỜI GIẢI TỪNG BƯỚC
-        </div>
-    `;
+    <div class="solution-header">📘 LỜI GIẢI TỪNG BƯỚC</div>`;
 
-
-  if (
-    mass === null &&
-    moles === null &&
-    volume === null
-  ) {
-
-    html += `
-            <div class="solution-empty">
-                ⚠️ Vui lòng nhập dữ liệu trước khi xem lời giải.
-            </div>
-        `;
-
+  if (mass === null && moles === null && volume === null) {
+    html += `<div class="solution-empty">⚠️ Vui lòng nhập dữ liệu trước khi xem lời giải.</div>`;
     showSolution("mole-solution", html);
     return;
   }
 
-
-  // KHỐI LƯỢNG → MOL
   if (mass !== null) {
-
-    const calculatedMoles =
-      mass / molarMass;
-
+    const calculatedMoles = mass / molarMass;
     html += `
-            <div class="solution-step">
-
-                <div class="solution-step-title">
-                    Bước 1 — Dữ kiện
-                </div>
-
-                <div>
-                    Hóa chất:
-                    <strong>${chem.formula}</strong>
-                </div>
-
-                <div>
-                    Khối lượng:
-                    <strong>${mass} g</strong>
-                </div>
-
-                <div>
-                    Khối lượng mol:
-                    <strong>${molarMass.toFixed(4)} g/mol</strong>
-                </div>
-
-            </div>
-
-
-            <div class="solution-step">
-
-                <div class="solution-step-title">
-                    Bước 2 — Công thức
-                </div>
-
-                <div class="solution-formula">
-                    n = m / M
-                </div>
-
-            </div>
-
-
-            <div class="solution-step">
-
-                <div class="solution-step-title">
-                    Bước 3 — Thay số
-                </div>
-
-                <div class="solution-formula">
-                    n = ${mass} / ${molarMass.toFixed(4)}
-                </div>
-
-            </div>
-
-
-            <div class="solution-step">
-
-                <div class="solution-step-title">
-                    Bước 4 — Kết quả
-                </div>
-
-                <div class="solution-answer">
-                    n = ${calculatedMoles.toFixed(6)} mol
-                </div>
-
-            </div>
-        `;
+      <div class="solution-step">
+        <div class="solution-step-title">Bước 1 — Dữ kiện</div>
+        <div>Hóa chất: <strong>${chem.formula}</strong></div>
+        <div>Khối lượng: <strong>${mass} g</strong></div>
+        <div>Khối lượng mol: <strong>${molarMass.toFixed(4)} g/mol</strong></div>
+      </div>
+      <div class="solution-step">
+        <div class="solution-step-title">Bước 2 — Công thức</div>
+        <div class="solution-formula">n = m / M</div>
+      </div>
+      <div class="solution-step">
+        <div class="solution-step-title">Bước 3 — Thay số</div>
+        <div class="solution-formula">n = ${mass} / ${molarMass.toFixed(4)}</div>
+      </div>
+      <div class="solution-step">
+        <div class="solution-step-title">Bước 4 — Kết quả</div>
+        <div class="solution-answer">n = ${calculatedMoles.toFixed(6)} mol</div>
+      </div>
+    `;
   }
 
-
-  // MOL → KHỐI LƯỢNG
   if (moles !== null) {
-
-    const calculatedMass =
-      moles * molarMass;
-
+    const calculatedMass = moles * molarMass;
     html += `
-            <div class="solution-step">
-
-                <div class="solution-step-title">
-                    Tính khối lượng
-                </div>
-
-                <div class="solution-formula">
-                    m = n × M
-                </div>
-
-                <br>
-
-                <div class="solution-formula">
-                    m = ${moles} × ${molarMass.toFixed(4)}
-                </div>
-
-                <div class="solution-answer">
-                    m = ${calculatedMass.toFixed(6)} g
-                </div>
-
-            </div>
-        `;
+      <div class="solution-step">
+        <div class="solution-step-title">Tính khối lượng</div>
+        <div class="solution-formula">m = n × M</div>
+        <br>
+        <div class="solution-formula">m = ${moles} × ${molarMass.toFixed(4)}</div>
+        <div class="solution-answer">m = ${calculatedMass.toFixed(6)} g</div>
+      </div>
+    `;
   }
 
-
-  // MOLARITY
-  if (
-    volume !== null &&
-    volume > 0
-  ) {
-
-    const baseMoles =
-      moles !== null
-        ? moles
-        : mass !== null
-          ? mass / molarMass
-          : null;
-
-
+  if (volume !== null && volume > 0) {
+    const baseMoles = moles !== null ? moles : (mass !== null ? mass / molarMass : null);
     if (baseMoles !== null) {
-
-      const molarity =
-        baseMoles / volume;
-
+      const molarity = baseMoles / volume;
       html += `
-                <div class="solution-step">
-
-                    <div class="solution-step-title">
-                        Tính nồng độ mol
-                    </div>
-
-                    <div class="solution-formula">
-                        C = n / V
-                    </div>
-
-                    <br>
-
-                    <div class="solution-formula">
-                        C =
-                        ${baseMoles.toFixed(6)}
-                        /
-                        ${volume}
-                    </div>
-
-                    <div class="solution-answer">
-                        C = ${molarity.toFixed(6)} M
-                    </div>
-
-                </div>
-            `;
+        <div class="solution-step">
+          <div class="solution-step-title">Tính nồng độ mol</div>
+          <div class="solution-formula">C = n / V</div>
+          <br>
+          <div class="solution-formula">C = ${baseMoles.toFixed(6)} / ${volume}</div>
+          <div class="solution-answer">C = ${molarity.toFixed(6)} M</div>
+        </div>
+      `;
     }
   }
 
-
-  showSolution(
-    "mole-solution",
-    html
-  );
+  showSolution("mole-solution", html);
 }
 
-
-// ═══════════════════════════════════════
-// PHA DUNG DỊCH
-// ═══════════════════════════════════════
-
 function showPreparationSolution() {
-
-  const chem =
-    getSelectedCalcChemical();
+  const chem = getSelectedCalcChemical();
 
   if (!chem) {
     alert("Vui lòng chọn hóa chất.");
     return;
   }
 
-  const molarMass =
-    chem.molarMass ||
-    Number.parseFloat(chem.molar);
-
-  const targetM =
-    readCalcNumber("calc-target-m");
-
-  const targetVolume =
-    readCalcNumber("calc-target-volume-l");
-
+  const molarMass = chem.molarMass || Number.parseFloat(chem.molar);
+  const targetM = readCalcNumber("calc-target-m");
+  const targetVolume = readCalcNumber("calc-target-volume-l");
 
   let html = `
-        <div class="solution-header">
-            📘 LỜI GIẢI PHA DUNG DỊCH
-        </div>
-    `;
+    <div class="solution-header">📘 LỜI GIẢI PHA DUNG DỊCH</div>`;
 
-
-  if (
-    targetM === null ||
-    targetVolume === null ||
-    targetM <= 0 ||
-    targetVolume <= 0
-  ) {
-
-    html += `
-            <div class="solution-empty">
-                ⚠️ Vui lòng nhập nồng độ và thể tích cần pha.
-            </div>
-        `;
-
-    showSolution(
-      "preparation-solution",
-      html
-    );
-
+  if (targetM === null || targetVolume === null || targetM <= 0 || targetVolume <= 0) {
+    html += `<div class="solution-empty">⚠️ Vui lòng nhập nồng độ và thể tích cần pha.</div>`;
+    showSolution("preparation-solution", html);
     return;
   }
 
-
-  const targetMoles =
-    targetM * targetVolume;
-
-  const gramsNeeded =
-    targetMoles * molarMass;
-
+  const targetMoles = targetM * targetVolume;
+  const gramsNeeded = targetMoles * molarMass;
 
   html += `
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 1 — Dữ kiện</div>
+      <div>Hóa chất: <strong>${chem.formula}</strong></div>
+      <div>Nồng độ: <strong>${targetM} M</strong></div>
+      <div>Thể tích: <strong>${targetVolume} L</strong></div>
+      <div>Khối lượng mol: <strong>${molarMass.toFixed(4)} g/mol</strong></div>
+    </div>
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 2 — Tính số mol</div>
+      <div class="solution-formula">n = C × V</div>
+      <br>
+      <div class="solution-formula">n = ${targetM} × ${targetVolume}</div>
+      <div class="solution-answer">n = ${targetMoles.toFixed(6)} mol</div>
+    </div>
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 3 — Tính khối lượng</div>
+      <div class="solution-formula">m = n × M</div>
+      <br>
+      <div class="solution-formula">m = ${targetMoles.toFixed(6)} × ${molarMass.toFixed(4)}</div>
+      <div class="solution-answer">m = ${gramsNeeded.toFixed(6)} g</div>
+    </div>
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 4 — Kết luận</div>
+      <div class="solution-answer">Cần cân ${gramsNeeded.toFixed(4)} g ${chem.formula} để pha ${targetVolume} L dung dịch ${targetM} M.</div>
+    </div>
+  `;
 
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 1 — Dữ kiện
-            </div>
-
-            <div>
-                Hóa chất:
-                <strong>${chem.formula}</strong>
-            </div>
-
-            <div>
-                Nồng độ:
-                <strong>${targetM} M</strong>
-            </div>
-
-            <div>
-                Thể tích:
-                <strong>${targetVolume} L</strong>
-            </div>
-
-            <div>
-                Khối lượng mol:
-                <strong>${molarMass.toFixed(4)} g/mol</strong>
-            </div>
-
-        </div>
-
-
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 2 — Tính số mol
-            </div>
-
-            <div class="solution-formula">
-                n = C × V
-            </div>
-
-            <br>
-
-            <div class="solution-formula">
-                n = ${targetM} × ${targetVolume}
-            </div>
-
-            <div class="solution-answer">
-                n = ${targetMoles.toFixed(6)} mol
-            </div>
-
-        </div>
-
-
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 3 — Tính khối lượng
-            </div>
-
-            <div class="solution-formula">
-                m = n × M
-            </div>
-
-            <br>
-
-            <div class="solution-formula">
-                m =
-                ${targetMoles.toFixed(6)}
-                ×
-                ${molarMass.toFixed(4)}
-            </div>
-
-            <div class="solution-answer">
-                m = ${gramsNeeded.toFixed(6)} g
-            </div>
-
-        </div>
-
-
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 4 — Kết luận
-            </div>
-
-            <div class="solution-answer">
-                Cần cân
-                ${gramsNeeded.toFixed(4)} g
-                ${chem.formula}
-                để pha
-                ${targetVolume} L
-                dung dịch
-                ${targetM} M.
-            </div>
-
-        </div>
-
-    `;
-
-
-  showSolution(
-    "preparation-solution",
-    html
-  );
+  showSolution("preparation-solution", html);
 }
-
-
-// ═══════════════════════════════════════
-// PHA LOÃNG
-// ═══════════════════════════════════════
 
 function showDilutionSolution() {
-
-  const stockM =
-    readCalcNumber("calc-stock-m");
-
-  const finalM =
-    readCalcNumber("calc-final-m");
-
-  const finalVolume =
-    readCalcNumber("calc-final-volume-l");
-
+  const stockM = readCalcNumber("calc-stock-m");
+  const finalM = readCalcNumber("calc-final-m");
+  const finalVolume = readCalcNumber("calc-final-volume-l");
 
   let html = `
-        <div class="solution-header">
-            📘 LỜI GIẢI PHA LOÃNG
-        </div>
-    `;
+    <div class="solution-header">📘 LỜI GIẢI PHA LOÃNG</div>`;
 
-
-  if (
-    stockM === null ||
-    finalM === null ||
-    finalVolume === null ||
-    stockM <= 0 ||
-    finalM <= 0 ||
-    finalVolume <= 0
-  ) {
-
-    html += `
-            <div class="solution-empty">
-                ⚠️ Vui lòng nhập đầy đủ C₁, C₂ và V₂.
-            </div>
-        `;
-
-    showSolution(
-      "dilution-solution",
-      html
-    );
-
+  if (stockM === null || finalM === null || finalVolume === null || stockM <= 0 || finalM <= 0 || finalVolume <= 0) {
+    html += `<div class="solution-empty">⚠️ Vui lòng nhập đầy đủ C₁, C₂ và V₂.</div>`;
+    showSolution("dilution-solution", html);
     return;
   }
 
-
-  const stockVolume =
-    (finalM * finalVolume) /
-    stockM;
-
-  const solventVolume =
-    Math.max(
-      finalVolume - stockVolume,
-      0
-    );
-
+  const stockVolume = (finalM * finalVolume) / stockM;
+  const solventVolume = Math.max(finalVolume - stockVolume, 0);
 
   html += `
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 1 — Dữ kiện</div>
+      <div>C₁ = <strong>${stockM} M</strong></div>
+      <div>C₂ = <strong>${finalM} M</strong></div>
+      <div>V₂ = <strong>${finalVolume} L</strong></div>
+    </div>
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 2 — Công thức</div>
+      <div class="solution-formula">C₁V₁ = C₂V₂</div>
+    </div>
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 3 — Tính V₁</div>
+      <div class="solution-formula">V₁ = (C₂ × V₂) / C₁</div>
+      <br>
+      <div class="solution-formula">V₁ = (${finalM} × ${finalVolume}) / ${stockM}</div>
+      <div class="solution-answer">V₁ = ${stockVolume.toFixed(6)} L</div>
+    </div>
+    <div class="solution-step">
+      <div class="solution-step-title">Bước 4 — Lượng dung môi</div>
+      <div class="solution-formula">Vdung môi = V₂ − V₁</div>
+      <br>
+      <div class="solution-formula">${finalVolume} − ${stockVolume.toFixed(6)}</div>
+      <div class="solution-answer">Dung môi ≈ ${solventVolume.toFixed(6)} L</div>
+    </div>
+  `;
 
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 1 — Dữ kiện
-            </div>
-
-            <div>
-                C₁ =
-                <strong>${stockM} M</strong>
-            </div>
-
-            <div>
-                C₂ =
-                <strong>${finalM} M</strong>
-            </div>
-
-            <div>
-                V₂ =
-                <strong>${finalVolume} L</strong>
-            </div>
-
-        </div>
-
-
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 2 — Công thức
-            </div>
-
-            <div class="solution-formula">
-                C₁V₁ = C₂V₂
-            </div>
-
-        </div>
-
-
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 3 — Tính V₁
-            </div>
-
-            <div class="solution-formula">
-                V₁ = (C₂ × V₂) / C₁
-            </div>
-
-            <br>
-
-            <div class="solution-formula">
-                V₁ =
-                (${finalM} × ${finalVolume})
-                /
-                ${stockM}
-            </div>
-
-            <div class="solution-answer">
-                V₁ = ${stockVolume.toFixed(6)} L
-            </div>
-
-        </div>
-
-
-        <div class="solution-step">
-
-            <div class="solution-step-title">
-                Bước 4 — Lượng dung môi
-            </div>
-
-            <div class="solution-formula">
-                Vdung môi = V₂ − V₁
-            </div>
-
-            <br>
-
-            <div class="solution-formula">
-                ${finalVolume}
-                −
-                ${stockVolume.toFixed(6)}
-            </div>
-
-            <div class="solution-answer">
-                Dung môi ≈
-                ${solventVolume.toFixed(6)} L
-            </div>
-
-        </div>
-
-    `;
-
-
-  showSolution(
-    "dilution-solution",
-    html
-  );
+  showSolution("dilution-solution", html);
 }
-
-
-// ═══════════════════════════════════════
-// MAKE FUNCTIONS AVAILABLE TO HTML
-// ═══════════════════════════════════════
 
 window.showMoleSolution = showMoleSolution;
 window.showPreparationSolution = showPreparationSolution;
 window.showDilutionSolution = showDilutionSolution;
 
-// ═══════════════════════════════════════
-// CALCULATOR → AI
-// ═══════════════════════════════════════
-
-
-// ───────────────────────────────────────
-// Lấy thông tin hóa chất hiện tại
-// ───────────────────────────────────────
-
 function getCalculatorChemicalContext() {
-
   const chem = getSelectedCalcChemical();
+  if (!chem) return null;
 
-  if (!chem) {
-    return null;
-  }
-
-  const molarMass =
-    chem.molarMass ||
-    Number.parseFloat(chem.molar);
-
+  const molarMass = chem.molarMass || Number.parseFloat(chem.molar);
   return {
     name: chem.name || chem.formula,
     formula: chem.formula || "",
@@ -2403,59 +1679,28 @@ function getCalculatorChemicalContext() {
   };
 }
 
-
-// ───────────────────────────────────────
-// MOL / MASS / MOLARITY → AI
-// ───────────────────────────────────────
-
 function askAIAboutMoleProblem() {
-
-  const chem =
-    getCalculatorChemicalContext();
-
+  const chem = getCalculatorChemicalContext();
   if (!chem) {
     alert("Vui lòng chọn hóa chất trước.");
     return;
   }
 
+  const mass = readCalcNumber("calc-mass-g");
+  const moles = readCalcNumber("calc-moles");
+  const volume = readCalcNumber("calc-volume-l");
 
-  const mass =
-    readCalcNumber("calc-mass-g");
-
-  const moles =
-    readCalcNumber("calc-moles");
-
-  const volume =
-    readCalcNumber("calc-volume-l");
-
-
-  if (
-    mass === null &&
-    moles === null &&
-    volume === null
-  ) {
+  if (mass === null && moles === null && volume === null) {
     alert("Vui lòng nhập dữ liệu Calculator trước.");
     return;
   }
 
-
-  const calculatedMoles =
-    mass !== null
-      ? mass / chem.molarMass
-      : moles;
-
-
+  const calculatedMoles = mass !== null ? mass / chem.molarMass : moles;
   let calculatedMolarity = null;
 
-  if (
-    volume !== null &&
-    volume > 0 &&
-    calculatedMoles !== null
-  ) {
-    calculatedMolarity =
-      calculatedMoles / volume;
+  if (volume !== null && volume > 0 && calculatedMoles !== null) {
+    calculatedMolarity = calculatedMoles / volume;
   }
-
 
   const prompt = `
 Tôi đang học Hóa học và vừa sử dụng Chemistry Calculator.
@@ -2471,15 +1716,8 @@ Dữ kiện:
 - Thể tích dung dịch: ${volume !== null ? volume + " L" : "Không nhập"}
 
 Kết quả Calculator:
-- Số mol: ${calculatedMoles !== null
-      ? calculatedMoles.toFixed(6) + " mol"
-      : "Không tính được"
-    }
-
-- Nồng độ mol: ${calculatedMolarity !== null
-      ? calculatedMolarity.toFixed(6) + " M"
-      : "Không tính được"
-    }
+- Số mol: ${calculatedMoles !== null ? calculatedMoles.toFixed(6) + " mol" : "Không tính được"}
+- Nồng độ mol: ${calculatedMolarity !== null ? calculatedMolarity.toFixed(6) + " M" : "Không tính được"}
 
 Hãy giải thích bài toán này cho một học sinh.
 
@@ -2493,53 +1731,28 @@ Yêu cầu:
 
 Không cần giải thích quá dài.
 Hãy dùng tiếng Việt dễ hiểu.
-    `;
-
+  `;
 
   sendQuick(prompt);
 }
 
-
-// ───────────────────────────────────────
-// PHA DUNG DỊCH → AI
-// ───────────────────────────────────────
-
 function askAIAboutPreparation() {
-
-  const chem =
-    getCalculatorChemicalContext();
-
+  const chem = getCalculatorChemicalContext();
   if (!chem) {
     alert("Vui lòng chọn hóa chất trước.");
     return;
   }
 
+  const targetM = readCalcNumber("calc-target-m");
+  const targetVolume = readCalcNumber("calc-target-volume-l");
 
-  const targetM =
-    readCalcNumber("calc-target-m");
-
-  const targetVolume =
-    readCalcNumber(
-      "calc-target-volume-l"
-    );
-
-
-  if (
-    targetM === null ||
-    targetVolume === null
-  ) {
+  if (targetM === null || targetVolume === null) {
     alert("Vui lòng nhập đầy đủ dữ liệu.");
     return;
   }
 
-
-  const targetMoles =
-    targetM * targetVolume;
-
-
-  const gramsNeeded =
-    targetMoles * chem.molarMass;
-
+  const targetMoles = targetM * targetVolume;
+  const gramsNeeded = targetMoles * chem.molarMass;
 
   const prompt = `
 Tôi đang học Hóa học.
@@ -2577,52 +1790,23 @@ Hãy giải thích cho học sinh:
 5. Giải thích ngắn gọn quy trình pha dung dịch.
 
 Dùng tiếng Việt dễ hiểu.
-    `;
-
+  `;
 
   sendQuick(prompt);
 }
 
-
-// ───────────────────────────────────────
-// PHA LOÃNG → AI
-// ───────────────────────────────────────
-
 function askAIAboutDilution() {
+  const stockM = readCalcNumber("calc-stock-m");
+  const finalM = readCalcNumber("calc-final-m");
+  const finalVolume = readCalcNumber("calc-final-volume-l");
 
-  const stockM =
-    readCalcNumber("calc-stock-m");
-
-  const finalM =
-    readCalcNumber("calc-final-m");
-
-  const finalVolume =
-    readCalcNumber(
-      "calc-final-volume-l"
-    );
-
-
-  if (
-    stockM === null ||
-    finalM === null ||
-    finalVolume === null
-  ) {
+  if (stockM === null || finalM === null || finalVolume === null) {
     alert("Vui lòng nhập đầy đủ dữ liệu.");
     return;
   }
 
-
-  const stockVolume =
-    (finalM * finalVolume) /
-    stockM;
-
-
-  const solventVolume =
-    Math.max(
-      finalVolume - stockVolume,
-      0
-    );
-
+  const stockVolume = (finalM * finalVolume) / stockM;
+  const solventVolume = Math.max(finalVolume - stockVolume, 0);
 
   const prompt = `
 Tôi đang học Hóa học.
@@ -2657,11 +1841,11 @@ Hãy:
 5. Nêu một lỗi học sinh thường mắc khi làm dạng bài này.
 
 Dùng tiếng Việt dễ hiểu.
-    `;
-
+  `;
 
   sendQuick(prompt);
 }
+
 // Bấm ra ngoài ô tìm hóa chất thì đóng danh sách gợi ý
 document.addEventListener("click", e => {
   if (!e.target.closest(".chemical-search-wrap")) {
